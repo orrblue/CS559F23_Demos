@@ -5,6 +5,8 @@ function myApp() {
     var context;
     var theta1 = 0;
     var theta2 = 90;
+    var move = false; // if square should move
+    
 
     var rect1;
 
@@ -13,24 +15,26 @@ function myApp() {
     function draw() {
         canvas.width = canvas.width;
 
-
-        context.translate(10, 10);
+        context.save();
         DrawAxes("red");
-
-        context.translate(-10, -10);
-        drawRect();
+        context.translate(10,10);
         DrawAxes("green");
+        context.restore();
 
+        context.save();
         context.translate(300, 300);
-        theta1 = theta1 + 0.08;
-        context.rotate(theta1);
+        // theta1 = theta1 + 0.08;
+        // context.rotate(theta1);
         // console.log(hexToRgb(context.strokeStyle));
         drawLine();
         // console.log(hexToRgb(context.strokeStyle));
+        context.restore();
+
+        context.translate(20,20);
+        DrawAxes("blue");
 
 
-
-        DrawAxes("green");
+        //DrawAxes("green");
         // context.save();
 
 
@@ -52,22 +56,23 @@ function myApp() {
     text.innerHTML = "test";
 
     function drawRect() {
+        //context.save();
         context.lineWidth = 8;
-        //context.strokeStyle = "blue";
         context.fillStyle = "lightBlue";
         context.beginPath();
         context.fillRect(200, 200, 100, 100);
         context.stroke();
+        //context.restore();
     }
 
     function drawLine() {
+        //context.save();
         context.lineWidth = 2;
-        context.strokeStyle = "blue";
+        context.strokeStyle = "purple";
         context.moveTo(0, 0);
-        //context.stroke();
         context.lineTo(20, 0);
         context.stroke();
-        context.strokeStyle = "red";
+        //context.restore();
     }
 
     function DrawAxes(color) {
