@@ -12,6 +12,7 @@ function setup() {
     var theta1 = slider1.value*0.005*Math.PI;
     var phi1 = slider2.value*0.005*Math.PI;
     
+    // This defines the shape, whose position can be varied.
     // note that this only changes the y
     // X just stays the same
     // the coordinate systems will move
@@ -28,7 +29,7 @@ function setup() {
       context.closePath();
       context.fill();
       
-      axes(color);
+      //axes(color);
     }
     
     function axes(color) {
@@ -50,7 +51,7 @@ function setup() {
     }
     
     // make sure you understand these
-    axes("black");
+    // axes("black");
     context.translate(50,150);
     linkage("blue");
     context.translate(100,0);
