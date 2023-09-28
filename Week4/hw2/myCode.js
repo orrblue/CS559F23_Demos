@@ -6,7 +6,7 @@ function myApp() {
     var theta1 = 0;
     var theta2 = 90;
     var move = false; // if square should move
-    
+
 
     var rect1;
 
@@ -17,7 +17,7 @@ function myApp() {
 
         context.save();
         DrawAxes("red");
-        context.translate(10,10);
+        context.translate(10, 10);
         DrawAxes("green");
         context.restore();
 
@@ -30,7 +30,7 @@ function myApp() {
         // console.log(hexToRgb(context.strokeStyle));
         context.restore();
 
-        context.translate(20,20);
+        context.translate(20, 20);
         DrawAxes("blue");
 
 
@@ -69,6 +69,7 @@ function myApp() {
         //context.save();
         context.lineWidth = 2;
         context.strokeStyle = "purple";
+        context.beginPath();
         context.moveTo(0, 0);
         context.lineTo(20, 0);
         context.stroke();

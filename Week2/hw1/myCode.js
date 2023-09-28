@@ -38,13 +38,13 @@ function drawSlider() {
 
 }
 
-function drawLine(a=200) {
+function drawLine(a = 200) {
     // a thick red line
     context.lineWidth = 2;
     context.strokeStyle = "green";
     let y = 350;
-    context.moveTo(200,a);
-    context.lineTo(a,y);
+    context.moveTo(200, a);
+    context.lineTo(a, y);
     context.stroke();
 
     context.moveTo(200, 200);
@@ -53,26 +53,26 @@ function drawLine(a=200) {
 
     line_text.style.color = "black";
 
-    if (a == 200 || a == y ) {
+    if (a == 200 || a == y) {
         //fill in the triangle
         context.fillStyle = "#00CC00";
-        context.moveTo(200,200);
-        context.lineTo(200,y);
+        context.moveTo(200, 200);
+        context.lineTo(200, y);
         context.lineTo(y, y);
         context.closePath();
         context.stroke();
-        context.fill(); 
-        
+        context.fill();
+
         line_text.style.color = "#00CC00";
         line_text.innerHTML = "IT'S TRIANGLE TIME!!!!!! "
     }
 
     //console.log("150, "+a + " to " + a + ", 300");
-    
+
 }
 
-function drawCircle(x=68, y=58, radius=30, color="pink") {
-    
+function drawCircle(x = 68, y = 58, radius = 30, color = "pink") {
+
     let max_radius = 40;
     let min_radius = 10;
     if (radius > max_radius) {
@@ -83,7 +83,7 @@ function drawCircle(x=68, y=58, radius=30, color="pink") {
     if (radius < min_radius) {
         radius = min_radius;
     }
-    
+
     context.beginPath();
     context.arc(x, y, radius, 0, 2 * Math.PI);
     context.lineWidth = 3;
@@ -92,11 +92,11 @@ function drawCircle(x=68, y=58, radius=30, color="pink") {
     context.strokeStyle = color;
     context.stroke();
 
-    
+
 }
 
 
-function drawBorder(width=slider1.value, height=slider2.value) {
+function drawBorder(width = slider1.value, height = slider2.value) {
     context.lineWidth = 10;
     context.strokeStyle = "blue";
     context.beginPath();
@@ -104,7 +104,7 @@ function drawBorder(width=slider1.value, height=slider2.value) {
     context.stroke();
 }
 
-function update() {
+function update(animationFrame) {
     // update logic here
 
 
@@ -114,39 +114,49 @@ function update() {
     var circle_x_pos = parseInt(slider4.value);
     //console.log(typeof circle_x_pos)
     line_text.innerHTML = a; // change text of slider
-    
+
 
     canvas.width = canvas.width;
 
     drawLine(a);
     drawBorder(x, y);
     drawCircle();
-    drawCircle(CIRCLE_X+circle_x_pos, CIRCLE_Y, circle_x_pos, "red");
+    drawCircle(CIRCLE_X + circle_x_pos, CIRCLE_Y, circle_x_pos, "red");
 
     drawSlider();
 
     drawCircle(blue_x, 50, 10, "red");
-    if (blue_x > 400) {
-        blue_x = blue_x_start;
-    }
-    else {
-        blue_x += 2;
-    }
+    if (animationFrame) {
+        if (blue_x > 400) {
+            blue_x = blue_x_start;
+        }
+        else {
+            blue_x += 2;
+        }
 
 
-    window.requestAnimationFrame(update); // keep looping
+        window.requestAnimationFrame(updateFromAnimation); // keep looping
+    }
 
 }
 
-slider1.addEventListener("input", update);
-slider2.addEventListener("input", update);
-slider3.addEventListener("input", update);
-slider4.addEventListener("input", update);
+function updateFromSlider() {
+    update(false); // stop looping
+}
+
+function updateFromAnimation() {
+    update(true); // keep looping
+}
+
+slider1.addEventListener("input", updateFromSlider);
+slider2.addEventListener("input", updateFromSlider);
+slider3.addEventListener("input", updateFromSlider);
+slider4.addEventListener("input", updateFromSlider);
 
 
 window.onload = setup();
 
-update(); // why does update seem to run faster and faster when I move any of the sliders?
+updateFromAnimation(); // why does update seem to run faster and faster when I move any of the sliders?
 // blue_x is always += 2 so it should be constant speed
 
 
