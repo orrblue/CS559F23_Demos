@@ -4,48 +4,255 @@ function myApp() {
     var canvas;
     var context;
     var theta1 = 0;
-    var theta2 = 90;
-    var move = false; // if square should move
+    var square_x = 100;
+    var nominal_square_y = 107;
+    var min_square_y = 30;
+    var curr_square_y = nominal_square_y;
+
+    var time_prev = Date.now();
+    var time_curr = Date.now();
+    var delta = time_curr - time_prev;
+    var phase = 0; // 0 - normal, 1 - going up, 2 - up horizontal, 3 - going down
+
+    var person_phase = 0; // 0 - normal, 1 - back
+    var person_x = 500;
+
+    var leftLegAng = 120 * Math.PI / 180;
+    const leftLegMin = 50 * Math.PI / 180;
+    const leftLegMax = 120 * Math.PI / 180;
+    
+    var rightLegAng = 50 * Math.PI / 180;    
+    const rightLegMin = 120 * Math.PI / 180;
+    const rightLegMax = 50 * Math.PI / 180;
 
 
-    var rect1;
+    document.addEventListener('keydown', function(event) {
+        if(event.keyCode == 38) {
+            //alert('Up was pressed');
+            phase = 1;
+        }
+        else if(event.keyCode == 40) {
+            //alert('Down was pressed');
+            phase = 3;
+        }
+    });
 
 
     // animation loop - clear, update, draw, schedule the next iteration
     function draw() {
         canvas.width = canvas.width;
 
-        context.save();
+        // draw axes
+        context.save(); { 
+            context.translate(10, 10);
+            DrawAxes("green");
+        } context.restore();
+        
         DrawAxes("red");
-        context.translate(10, 10);
-        DrawAxes("green");
-        context.restore();
 
-        context.save();
-        context.translate(300, 300);
-        // theta1 = theta1 + 0.08;
+        // draw floor
+        context.save(); {
+            context.translate(0,220);
+            drawLine(length=600);
+            context.translate(0, 10);
+            drawLine(length=600);
+            context.translate(0, -10)
+            
+            drawPerson();
+
+        } context.restore();
+
+        //time_curr = Date.now();
+        //delta = time_curr - time_prev;
+
+        // go horizontal low
+        if (delta > 800 && phase == 0) {
+            console.log(phase);
+
+            //phase = 1;
+            
+        }
+
+        // go up
+        else if (phase == 1) {
+            if ( curr_square_y > min_square_y) {
+                curr_square_y -= 1;
+            }
+            else {
+                //phase = 2;
+                //time_prev = time_curr; // reset the timer / delta
+            }
+            
+        }
+
+        // go horizontal high
+        else if (phase == 2) {
+            if (delta < 800) {
+                curr_square_y = min_square_y;
+            } else {
+                phase = 3;
+            }
+        }
+
+        // go down
+        else if (phase == 3) {
+            if (curr_square_y < nominal_square_y) {
+                curr_square_y += 1;
+            } else {
+                phase = 0;
+                //time_prev = time_curr; // reset the timer / delta
+            }
+            
+        }
+
+        
+
+        // draw square, moving 
+        context.save(); {
+            context.translate(square_x,curr_square_y);
+            drawRect();
+            square_x += 0.3;
+
+            // draw right rotating line
+            context.save(); {
+                context.translate(100,100);
+                drawCircle();
+                theta1 = theta1 + 0.08;
+                context.rotate(theta1);
+                drawLine();
+            } context.restore();
+
+            // draw left rotating line
+            context.save(); {
+                context.translate(0,100);
+                drawCircle();
+                context.rotate(theta1);
+                drawLine();
+            } context.restore();
+
+
+        } context.restore();
+
+        // console.log("Square: " +square_x);
+        // console.log(person_x);
+        if (square_x - 100 == person_x) {
+            
+            console.log("equal");
+        }
+        
+
+        // context.save();
+        // context.translate(300, 300);
+        // theta1 = theta1 + 0.06;
         // context.rotate(theta1);
-        // console.log(hexToRgb(context.strokeStyle));
-        drawLine();
-        // console.log(hexToRgb(context.strokeStyle));
-        context.restore();
+        // drawLine();
+        // context.restore();
 
+        
         context.translate(20, 20);
         DrawAxes("blue");
 
 
-        //DrawAxes("green");
-        // context.save();
-
-
-        // context.restore();
-        // context.translate(100, 300);
-        // theta2 = theta2 + 0.08;
-        // context.rotate(theta2);
-        // drawLine();
+    
 
         window.requestAnimationFrame(draw);
     }
+
+
+
+
+
+    function drawPerson() {
+
+        person_x -= 0.6;
+
+        let legSpeed = 0.03
+        if (person_phase == 0 ){
+            if (leftLegAng > leftLegMin) {
+                leftLegAng -= legSpeed;
+                rightLegAng += legSpeed;
+            } else {
+                person_phase = 1;
+            }           
+        } else if (person_phase == 1) {
+            if (leftLegAng < leftLegMax) {
+                leftLegAng += 0.03;
+                rightLegAng -= legSpeed;
+            } else {
+                person_phase = 0;
+            }    
+        }
+
+
+
+        context.translate(person_x, -15);
+
+        // RIGHT LEG
+        context.save(); {
+            context.rotate(rightLegAng);
+            context.scale(0.2, 0.2);
+            linkage("red"); 
+        } context.restore();
+
+        // LEFT LEG
+        context.save(); {
+            context.rotate(leftLegAng);
+            context.scale(0.2, 0.2);
+            linkage("orange"); 
+        } context.restore();
+
+        // TORSO
+        context.save(); {
+            context.rotate(270 * Math.PI / 180);
+            context.scale(0.2, 0.2);
+            linkage("blue"); 
+        } context.restore();
+
+
+        context.translate(0, -20);
+
+        // RIGHT ARM
+        context.save(); {
+            context.rotate(rightLegAng);
+            context.scale(0.2, 0.2);
+            linkage("red"); 
+        } context.restore();
+
+        // LEFT ARM
+        context.save(); {
+            context.rotate(leftLegAng);
+            context.scale(0.2, 0.2);
+            linkage("orange"); 
+        } context.restore();
+
+        // HEAD
+        context.save(); {
+            context.translate(0, -5);
+            context.scale(0.2, 0.2);
+            drawCircle(20, color="black");
+        } context.restore();
+
+        
+
+    }
+
+
+
+
+    function linkage(color) {
+      
+        context.beginPath();
+        context.fillStyle = color;
+        context.moveTo(0,0);
+        context.lineTo(10,5);
+        context.lineTo(90,5);
+        context.lineTo(100,0);
+        context.lineTo(90,-5);
+        context.lineTo(10,-5);
+        context.closePath();
+        context.fill();
+    }
+
 
     // set up the elements
     canvas = document.getElementById('myCanvas');
@@ -55,26 +262,48 @@ function myApp() {
     text = document.getElementById('text');
     text.innerHTML = "test";
 
+
+
+
+
     function drawRect() {
         //context.save();
         context.lineWidth = 8;
         context.fillStyle = "lightBlue";
         context.beginPath();
-        context.fillRect(200, 200, 100, 100);
+        context.moveTo(0,0);
+        context.fillRect(0, 0, 100, 100);
         context.stroke();
         //context.restore();
     }
 
-    function drawLine() {
+
+
+
+    function drawLine(length=20) {
         //context.save();
         context.lineWidth = 2;
         context.strokeStyle = "purple";
         context.beginPath();
         context.moveTo(0, 0);
-        context.lineTo(20, 0);
+        context.lineTo(length, 0);
         context.stroke();
         //context.restore();
     }
+
+
+
+
+    function drawCircle(radius=20, color="brown"){
+        context.lineWidth=2;
+        context.strokeStyle = "brown";
+        context.beginPath();
+        context.arc(0,0, radius, 0, 2*Math.PI);
+        context.stroke();
+    }
+
+
+
 
     function DrawAxes(color) {
         context.lineWidth = 1;
@@ -95,24 +324,6 @@ function myApp() {
         context.stroke();
     }
 
-
-
-    function hex2a(hexx) {
-        var hex = hexx.toString();//force conversion
-        var str = '';
-        for (var i = 0; i < hex.length; i += 2)
-            str += String.fromCharCode(parseInt(hex.substr(i, 2), 16));
-        return str;
-    }
-
-    function hexToRgb(hex) {
-        var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-        return result ? {
-            r: parseInt(result[1], 16),
-            g: parseInt(result[2], 16),
-            b: parseInt(result[3], 16)
-        } : null;
-    }
 
 
     drawRect();
