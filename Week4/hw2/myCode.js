@@ -42,13 +42,15 @@ function myApp() {
     function draw() {
         canvas.width = canvas.width;
 
+        //displayImage("./test.jpg", 1920, 1200);
+
         // draw axes
         context.save(); { 
             context.translate(10, 10);
-            DrawAxes("green");
+            //DrawAxes("green");
         } context.restore();
         
-        DrawAxes("red");
+        //DrawAxes("red");
 
         // draw floor
         context.save(); {
@@ -133,12 +135,18 @@ function myApp() {
 
         } context.restore();
 
-        // console.log("Square: " +square_x);
-        // console.log(person_x);
-        if (square_x - 100 == person_x) {
+
+        // check if car and person have collided
+        var thresh = 8;
+        if ((square_x + 120 - person_x) < 150 && (square_x + 120 - person_x) > -thresh && curr_square_y >= nominal_square_y) {
             
             console.log("equal");
+            alert("crash! Press UP ARROW!!");
         }
+
+    
+        //console.log(square_x + 120 - person_x);
+        
         
 
         // context.save();
@@ -150,7 +158,7 @@ function myApp() {
 
         
         context.translate(20, 20);
-        DrawAxes("blue");
+        //DrawAxes("blue");
 
 
     
@@ -260,7 +268,7 @@ function myApp() {
 
     // This Works
     text = document.getElementById('text');
-    text.innerHTML = "test";
+    //text.innerHTML = "test";
 
 
 
@@ -300,6 +308,17 @@ function myApp() {
         context.beginPath();
         context.arc(0,0, radius, 0, 2*Math.PI);
         context.stroke();
+    }
+
+
+
+    // linux Hint.com
+    function displayImage(src, width, height) {
+        var img = document.createElement("img");
+        img.src = src;
+        img.width = width;
+        img.height = height;
+        document.body.appendChild(img);
     }
 
 
