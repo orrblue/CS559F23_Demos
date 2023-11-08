@@ -285,13 +285,26 @@ function setup() {
         context.stroke();
 	}
 
+
+    function drawBorder(color, TxU, scale) {
+        var Tx = mat4.clone(TxU);
+        mat4.scale(Tx,Tx,[scale,scale,scale]);
+        context.beginPath();
+        context.strokeStyle = color;
+        moveToTx([0,0,0],Tx);lineToTx([0,1,0],Tx);
+        lineToTx([1,1,0],Tx);lineToTx([1,0,0],Tx);
+        lineToTx([0,0,0],Tx);
+        context.closePath();
+        context.stroke();
+    }
+
     // create two lookAt transforms; one for the camera
     // and one for the "external observer"
 
     // Create Camera (lookAt) transform
     var eyeCamera = CameraCurve(viewAngle);
     var targetCamera = vec3.fromValues(0,0,0); // Aim at the origin of the world coords
-    var upCamera = vec3.fromValues(0,100,0); // Y-axis of world coords to be vertical
+    var upCamera = vec3.fromValues(0,1,0); // Y-axis of world coords to be vertical
 	var TlookAtCamera = mat4.create();
     mat4.lookAt(TlookAtCamera, eyeCamera, targetCamera, upCamera);
       
@@ -304,20 +317,29 @@ function setup() {
       
     // Create ViewPort transform (assumed the same for both canvas instances)
     var Tviewport = mat4.create();
-	mat4.fromTranslation(Tviewport,[200,300,0]);  // Move the center of the
+	mat4.fromTranslation(Tviewport,[100,300,0]);  // Move the center of the
                                                   // "lookAt" transform (where
                                                   // the camera points) to the
                                                   // canvas coordinates (200,300)
 	mat4.scale(Tviewport,Tviewport,[100,-100,1]); // Flip the Y-axis,
                                                   // scale everything by 100x
-    // make sure you understand these    
+    
+    // Nitzan's mirror
+    var TmirrorPort = mat4.create();
+    mat4.fromTranslation(TmirrorPort,[300,300,0]);  // Move the center of the mirror to the right
+    mat4.scale(TmirrorPort,TmirrorPort,[1,-1,1]); // Flip the Y-axis,
+                                                  // scale everything by 100x
+    // draw axes
+    context = observerContext;
+    draw2DAxes("black", TmirrorPort);
+    //draw2DAxes("red", Tviewport);
+                                                
 
     context = cameraContext;
-
     // Create Camera projection transform
     // (orthographic for now)
     var TprojectionCamera = mat4.create();
-    mat4.ortho(TprojectionCamera,-100,100,-100,100,-1,1);
+    mat4.ortho(TprojectionCamera,-100,100,-100,100,-1,1); // ortho(out, left, right, bottom, top, near, far)
     //mat4.perspective(TprojectionCamera,Math.PI/4,1,-1,1); // Use for perspective teaser!
 
     // Create Observer projection transform
@@ -330,9 +352,15 @@ function setup() {
     var tVP_PROJ_VIEW_Camera = mat4.create();
     mat4.multiply(tVP_PROJ_VIEW_Camera,Tviewport,TprojectionCamera);
     mat4.multiply(tVP_PROJ_VIEW_Camera,tVP_PROJ_VIEW_Camera,TlookAtCamera);
+    // Create transform t_VP_PROJ_Observer
     var tVP_PROJ_VIEW_Observer = mat4.create();
     mat4.multiply(tVP_PROJ_VIEW_Observer,Tviewport,TprojectionObserver);
     mat4.multiply(tVP_PROJ_VIEW_Observer,tVP_PROJ_VIEW_Observer,TlookAtObserver);
+
+    // Create transform t_VP_PROJ_Mirror
+    var tVP_PROJ_VIEW_Mirror = mat4.create();
+    mat4.multiply(tVP_PROJ_VIEW_Mirror,Tviewport,TprojectionObserver);
+    mat4.multiply(tVP_PROJ_VIEW_Mirror,tVP_PROJ_VIEW_Mirror,TlookAtObserver);
       
 	// Create model(ing) transform
     // (from moving object to world)
@@ -354,7 +382,7 @@ function setup() {
     mat4.invert(TlookFromCamera,TlookAtCamera);
     mat4.multiply(tVP_PROJ_VIEW_MOD2_Observer, tVP_PROJ_VIEW_MOD2_Observer, TlookFromCamera);
 
-    // Draw the following in the Camera window
+    // Draw the following in the Camera window (right)
     context = cameraContext;
     draw2DAxes("black", mat4.create());
 	draw3DAxes("grey",tVP_PROJ_VIEW_Camera,100.0);
@@ -365,15 +393,24 @@ function setup() {
     draw3DAxes("green", tVP_PROJ_VIEW_MOD_Camera,100.0); // Uncomment to see "model" coords
     drawObject("green",tVP_PROJ_VIEW_MOD_Camera,100.0);
       
-    // Draw the following in the Observer window
+    // Draw the following in the Observer window (left)
     context = observerContext;
+    //context= cameraContext;
 	draw3DAxes("grey",tVP_PROJ_VIEW_Observer,100.0);  
     // drawUpVector("orange",upCamera,tVP_PROJ_VIEW_Observer,1.0);
     drawTrajectory(0.0,1.0,100,C0,tVP_PROJ_VIEW_Observer,"red");
     drawTrajectory(0.0,1.0,100,C1,tVP_PROJ_VIEW_Observer,"blue");
     drawObject("green",tVP_PROJ_VIEW_MOD1_Observer,100.0);     
-    drawCamera("purple",tVP_PROJ_VIEW_MOD2_Observer,10.0); 
-	drawUVWAxes("purple",tVP_PROJ_VIEW_MOD2_Observer,100.0);  
+    //drawCamera("purple",tVP_PROJ_VIEW_MOD2_Observer,10.0); 
+	//drawUVWAxes("purple",tVP_PROJ_VIEW_MOD2_Observer,100.0);  
+
+    // NITZAN CAMERA MIRROR
+    drawTrajectory(0.0,0.5,100,C0,tVP_PROJ_VIEW_MOD2_Observer,"red");
+    //drawTrajectory(0.0,1.0,100,C1,tVP_PROJ_VIEW_MOD2_Observer,"blue");
+    drawObject("green",tVP_PROJ_VIEW_MOD2_Observer,100.0); 
+    drawBorder("black", tVP_PROJ_VIEW_MOD2_Observer, 100.0);
+    draw3DAxes("grey",tVP_PROJ_VIEW_MOD2_Observer,100.0);
+    drawCube("green",tVP_PROJ_VIEW_MOD2_Observer,22.0); //NITZAN
     }
     
   
